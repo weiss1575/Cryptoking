@@ -3,6 +3,9 @@ import re
 import pandas_datareader as pdr
 import datetime as dt
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+from matplotlib.ticker import (MultipleLocator, AutoMinorLocator)
+import numpy as np
 
 def get_tweets():
     '''
@@ -22,19 +25,15 @@ def filter_tweets(tweets):
     Filters and seperates tweets based on bitcoin and doge keywords.
     Returns btc_tweets, a list of tweets containing bitcoin keywords, and doge_tweets, a list of tweets containing dogecoin keywords.
     '''
-    BTC_KEYWORDS = ['Bitcoin', 'bitcoin', 'BITCOIN', 'btc', 'BTC', 'Btc']
-    DOGE_KEYWORDS = ['Dogecoin', 'dogecoin', 'DOGECOIN', 'doge', 'DOGE', 'Doge']
+    BTC_KEYWORDS = ['bitcoin', 'btc']
+    DOGE_KEYWORDS = ['dogecoin', 'doge']
     btc_tweets = []
     doge_tweets = []
     for tweet in tweets:
-        for btc_word in BTC_KEYWORDS:
-            if btc_word in tweet[1]:
-                btc_tweets.append(tweet[0])
-                break
-        for doge_word in DOGE_KEYWORDS:
-            if doge_word in tweet[1]:
-                doge_tweets.append(tweet[0])
-                break
+        if any([btc_word in tweet[1] for btc_word in BTC_KEYWORDS]):
+            btc_tweets.append(tweet[0])
+        if any([doge_word in tweet[1] for doge_word in DOGE_KEYWORDS]):
+            doge_tweets.append(tweet[0])
     return btc_tweets, doge_tweets
 
 
@@ -51,32 +50,40 @@ def plot_data(crypto_data, btc_dates, doge_dates):
     '''
     Uses matplotlib to plot price data as well as points where elon tweeted about the currency
     '''
-    fig, ax1 = plt.subplots()
+    # Make plot and set title
+    fig, ax1 = plt.subplots(figsize = (15, 9))
     ax1.set_title("CryptoKing", fontsize = 24)
+
+    # Add x-axis minor ticks and format
+    fmt_day = mdates.DayLocator()
+    ax1.xaxis.set_minor_locator(fmt_day)
+    fig.autofmt_xdate()
 
     # Bitcoin plot
     color = 'red'
     ax1.set_xlabel('Date', fontsize=16)
     ax1.set_ylabel('BTC-USD', color=color, fontsize=16)
     ax1.plot(crypto_data.index, crypto_data['BTC-USD'], color=color)
-    ax1.tick_params(axis = 'both', which = 'major', labelsize = 12)
+    ax1.tick_params(axis = 'both', which = 'major', width=2, length=6, labelsize = 16)
+    ax1.yaxis.set_minor_locator(AutoMinorLocator())
 
     # Dogecoin plot
     ax2 = ax1.twinx()
     color = 'blue'
     ax2.set_ylabel('DOGE-USD', color=color, fontsize=16)
     ax2.plot(crypto_data.index, crypto_data['DOGE-USD'], color=color)
-    ax2.tick_params(axis = 'both', which = 'major', labelsize = 12)
+    ax2.tick_params(axis = 'both', which = 'major', width=2, length=6, labelsize = 16)
+    ax2.yaxis.set_minor_locator(AutoMinorLocator())
 
     for date in btc_dates:
         x = dt.datetime.strptime(date, "%Y-%m-%d").date()
         y = crypto_data.loc[date]['BTC-USD']
-        ax1.scatter(x, y, c='green', s=150, alpha=0.5)
+        ax1.scatter(x, y, c='green', s=200, alpha=0.7, marker='x')
 
     for date in doge_dates:
         x = dt.datetime.strptime(date, "%Y-%m-%d").date()
         y = crypto_data.loc[date]['DOGE-USD']
-        ax2.scatter(x, y, c='green', s=150, alpha=0.5)
+        ax2.scatter(x, y, c='green', s=200, alpha=0.7, marker='x')
 
     plt.show()
 
