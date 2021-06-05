@@ -50,6 +50,8 @@ def plot_data(crypto_data, btc_dates, doge_dates):
     '''
     Uses matplotlib to plot price data as well as points where elon tweeted about the currency
     '''
+
+    plt.style.use('dark_background')
     # Make plot and set title
     fig, ax1 = plt.subplots(figsize = (15, 9))
     ax1.set_title("CryptoKing", fontsize = 24)
@@ -59,7 +61,7 @@ def plot_data(crypto_data, btc_dates, doge_dates):
     ax1.xaxis.set_minor_locator(fmt_day)
     fig.autofmt_xdate()
 
-    # Bitcoin plot
+    # Bitcoin Price plot
     color = 'red'
     ax1.set_xlabel('Date', fontsize=16)
     ax1.set_ylabel('BTC-USD', color=color, fontsize=16)
@@ -67,7 +69,7 @@ def plot_data(crypto_data, btc_dates, doge_dates):
     ax1.tick_params(axis = 'both', which = 'major', width=2, length=6, labelsize = 16)
     ax1.yaxis.set_minor_locator(AutoMinorLocator())
 
-    # Dogecoin plot
+    # Dogecoin Price plot
     ax2 = ax1.twinx()
     color = 'blue'
     ax2.set_ylabel('DOGE-USD', color=color, fontsize=16)
@@ -75,16 +77,17 @@ def plot_data(crypto_data, btc_dates, doge_dates):
     ax2.tick_params(axis = 'both', which = 'major', width=2, length=6, labelsize = 16)
     ax2.yaxis.set_minor_locator(AutoMinorLocator())
 
-    for date in btc_dates:
-        x = dt.datetime.strptime(date, "%Y-%m-%d").date()
-        y = crypto_data.loc[date]['BTC-USD']
-        ax1.scatter(x, y, c='green', s=200, alpha=0.7, marker='x')
+    # Plot Elons BTC tweets as scatter points
+    x = [dt.datetime.strptime(date, "%Y-%m-%d").date() for date in btc_dates]
+    y = [crypto_data.loc[date]['BTC-USD'] for date in btc_dates]
+    ax1.scatter(x, y, c='yellow', s=200, alpha=0.7, marker='x', label = 'Elon Tweet')
 
-    for date in doge_dates:
-        x = dt.datetime.strptime(date, "%Y-%m-%d").date()
-        y = crypto_data.loc[date]['DOGE-USD']
-        ax2.scatter(x, y, c='green', s=200, alpha=0.7, marker='x')
+    # Plot Elons Doge tweets as scatter points
+    x = [dt.datetime.strptime(date, "%Y-%m-%d").date() for date in doge_dates]
+    y = [crypto_data.loc[date]['DOGE-USD'] for date in doge_dates]
+    ax2.scatter(x, y, c='yellow', s=200, alpha=0.7, marker='x')
 
+    ax1.legend(fontsize=12)
     plt.show()
 
 
